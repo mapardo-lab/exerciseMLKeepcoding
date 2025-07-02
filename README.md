@@ -1,4 +1,5 @@
 # exerciseMLKeepcoding
-Exercise for Machine Learnig module of BigData, AI and Machine Learning Bootcamp (Keepcoding)
 
-Predict the Airbnb price using the available data.
+Machine Learning exercise for Bootcamp BigData, Artificial Intelligence and Machine Learning
+
+Predict prices of new accommodations based on available data.
