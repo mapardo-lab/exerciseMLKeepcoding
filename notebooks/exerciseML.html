@@ -83,10 +83,10 @@ ul.task-list li input[type="checkbox"] {
 <section id="exploratory-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory data analysis</h2>
 <p>Data contains 14,780 samples with 89 features. <code>Price</code> feature will be considered as target.</p>
-<p>In line with the goal of this analysis described above in objetive section, only features related to the accommodation’s characteristics (amenities, location, etc.) will be retained, while all data related to reviews, availability, or pricing will be removed.</p>
+<p>In line with the goal of this analysis described above in objetive section, only features related to the accommodation’s characteristics (amenities, location, etc.) will be retained, while all data related to reviews, availability, or pricing will not be considered.</p>
 <p>This applies, for example, when a client has a property with specific features and location, and wants to know at what price to offer accommodation.</p>
 <p>The dataset contains no duplicates entries, confirmed by checking the unique identifiers features: <code>ID</code>, <code>Scrape ID</code> and <code>Name</code>. An analysis of missing data revealed that 59 features contain NA values. <a href="#fig-na" class="quarto-xref">Figure&nbsp;1</a> shows the features with the highest percentages of missing values.</p>
-<div id="cell-fig-na" class="cell" data-execution_count="27">
+<div id="cell-fig-na" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div id="fig-na" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -103,7 +103,7 @@ Figure&nbsp;1: Percentage of missing values by feature (showing features with &g
 <section id="target-feature." class="level3">
 <h3 class="anchored" data-anchor-id="target-feature.">Target feature.</h3>
 <p>The distribution of the <code>Price</code> feature shows a right-skewed to the right with a peak around 50 (<a href="#fig-price" class="quarto-xref">Figure&nbsp;2</a>). Values range from 9.0 to 999.0. The target feature contains 17 NA values. This accommodations will be remove before training the model and could be used later for testing.</p>
-<div id="cell-fig-price" class="cell" data-execution_count="8">
+<div id="cell-fig-price" class="cell" data-execution_count="13">
 <div class="cell-output cell-output-display">
 <div id="fig-price" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -120,16 +120,239 @@ Figure&nbsp;2: Distribution of the Price feature.
 </section>
 <section id="features-for-prediction." class="level3">
 <h3 class="anchored" data-anchor-id="features-for-prediction.">Features for prediction.</h3>
+<p>A selection of features is performed. First, all features with data available for more than 70% of samples are kept (for example, the <code>Square Feet</code> feature). Next, features unrelated to accomodation characteristics are also removed, such as those containing strings like <strong>url</strong>, <strong>host</strong> or <strong>name</strong>. After this filtering process, only 25 features remain.</p>
+<p>In the second stage, the remaining features were examined in greater detail to identify redundancies. For example, multiple location-related features were available (<code>Host Location</code>, <code>City</code>, <code>State</code>,<code>Market</code>, <code>Smart Location</code>, <code>Country Code</code>, <code>Country</code>). These variables contained highly redundant information, so only the most informative ones were retained (<code>Smart Location</code> and <code>Country Code</code>).</p>
+<p>A similar situation occurs with neighborhood-related features. In this case, only ‘Neighbourhood Group Cleaned’ is retained because it contains no missing values and serves as a simplified version of ‘Neighbourhood Cleaned’ with fewer categorical levels.</p>
+<p><code>Experiences Offered</code> feature is discarded because information is only available for 11 samples.</p>
+<p>After this filtering process, 16 features were retained. A comprehensive analysis of these remaining features is presented below. Visual inspection was conducted by grouping features into types: discrete quantitative, qualitative and continuous quantitative. <code>Amenities</code>, <code>Smart Location</code> and <code>Neighbourhood</code> features were analysed separately.</p>
+<p><strong>Discrete quantitative</strong></p>
+<p>These features show different distributions with most of the accomodations having one bathroom, one bedroom, one bed and accomodating one guest (see <a href="#fig-features-discquan" class="quarto-xref">Figure&nbsp;3</a>). One accomodation shows a zero value for the <code>Guest included</code> feature and 66 accomodations show zero value for the <code>Bathrooms</code> feature.</p>
+<div id="cell-fig-features-discquan" class="cell" data-execution_count="36">
+<div class="cell-output cell-output-display">
+<div id="fig-features-discquan" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-features-discquan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-features-discquan-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-features-discquan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Distribution for discrete quantitative features.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Qualitative</strong></p>
+<p>Features exhibit unbalanced distributions across their levels. Most features show distributions where the majority of samples are concentrated in one or few categories. For example, ‘Apartment’ is the most frequent level for <code>Property Type</code> feature, and most accomodations are labeled ‘ES’ for the <code>Country Code</code> feature (see <a href="#fig-features-qual" class="quarto-xref">Figure&nbsp;4</a>)</p>
+<div id="cell-fig-features-qual" class="cell" data-execution_count="39">
+<div class="cell-output cell-output-display">
+<div id="fig-features-qual" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-features-qual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-features-qual-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-features-qual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Distribution for qualitative features.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Continuous quantitative</strong></p>
+<p>These features exhibit sharp peaks centered at 40 and 0 for <code>Latitude</code> and <code>Longitude</code> respectively (see <a href="#fig-features-contquant" class="quarto-xref">Figure&nbsp;5</a>). The <code>Latitude</code> feature ranges from -40 to 60, while <code>Longitude</code> from -150 to 150.</p>
+<div id="cell-fig-features-contquant" class="cell" data-execution_count="40">
+<div class="cell-output cell-output-display">
+<div id="fig-features-contquant" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-features-contquant-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-features-contquant-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-features-contquant-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Distribution for continuous quantitative features.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Amenities feature</strong></p>
+<p>A total of 83 different amenities were found, with only 19 of them included in more than 20% of the accommodations (<a href="#fig-amenities" class="quarto-xref">Figure&nbsp;6</a>)</p>
+<div id="cell-fig-amenities" class="cell" data-execution_count="42">
+<div class="cell-output cell-output-display">
+<div id="fig-amenities" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-amenities-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-amenities-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-amenities-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Frequencies for the most common amenities (greater than 20%)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Smart Location</strong></p>
+<p>There are 254 different locations, with most accommodations concentrated in Madrid (over 85%). Barcelona is the second most frequent location, while all others individually account for less than 1% each (<a href="#fig-location" class="quarto-xref">Figure&nbsp;7</a>).</p>
+<div id="cell-fig-location" class="cell" data-execution_count="44">
+<div class="cell-output cell-output-display">
+<div id="fig-location" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-location-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-location-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-location-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Frequencies for the five most common locations
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Neighbourhood</strong></p>
+<p>There are 49 different neighbourhoods, with most accommodations concentrated in Centro (over 45%). All others individually account for less than 7% each (<a href="#fig-neighb" class="quarto-xref">Figure&nbsp;8</a>).</p>
+<div id="cell-fig-neighb" class="cell" data-execution_count="47">
+<div class="cell-output cell-output-display">
+<div id="fig-neighb" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-neighb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-neighb-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-neighb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Frequencies for the five most common locations
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="feature-selection" class="level3">
+<h3 class="anchored" data-anchor-id="feature-selection">Feature selection</h3>
+<p>At this stage, useful features have been selected by discarding those without valuable information. These retained features will now be used to identify the optimal subset of features with maximum predictive power through a three-steps process:</p>
+<ol type="1">
+<li><p>Impute missing values and encode the features to ensure proper processing and compatibility with analytical algorithm.</p></li>
+<li><p>Calculate the individual predictive power of each feature. Features with low predictive power may be discarded.</p></li>
+<li><p>Search for the optimal feature subset to be used in model training.</p></li>
+</ol>
+<p>The imputation strategy was designed based on the distribution of missing values (see <a href="#fig-na-feature" class="quarto-xref">Figure&nbsp;9</a>). Missing values were replaced by the mode (most frequent value).</p>
+<div id="cell-fig-na-feature" class="cell" data-execution_count="48">
+<div class="cell-output cell-output-display">
+<div id="fig-na-feature" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-na-feature-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-na-feature-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-na-feature-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Percentage of missing values
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The list of amenities were transformed into binary columns. Predictive power analysis was then performed on these amenities to select the most informative (see <a href="#fig-mi-amenities" class="quarto-xref">Figure&nbsp;10</a>). The twelve most informative amenities were selected.</p>
+<div id="cell-fig-mi-amenities" class="cell" data-execution_count="52">
+<div class="cell-output cell-output-display">
+<div id="fig-mi-amenities" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mi-amenities-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-mi-amenities-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mi-amenities-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: Mutual information of amenities features
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="predictive-power-of-each-feature" class="level4">
+<h4 class="anchored" data-anchor-id="predictive-power-of-each-feature">Predictive power of each feature</h4>
+<p>Several parameters were monitorized to evaluate the predictive power of each feature:</p>
+<ul>
+<li><p>Mutual information between each feature and the target (<a href="#fig-mi-features" class="quarto-xref">Figure&nbsp;11</a>)</p></li>
+<li><p>Performance of the 1D model for each feature (<a href="#fig-1dmodel-features" class="quarto-xref">Figure&nbsp;12</a>)</p></li>
+<li><p>Relationships between the predictive features using Pearson’s correlation, Cramer’s V test and mutual information (<a href="#fig-features-corr" class="quarto-xref">Figure&nbsp;13</a>, <a href="#fig-features-cramer" class="quarto-xref">Figure&nbsp;14</a> and <a href="#fig-matrix-mi" class="quarto-xref">Figure&nbsp;15</a>)</p></li>
+</ul>
+<p>Based on this information, some features were removed:</p>
+<ul>
+<li><p>Although they show good predictive power, the features <code>Beds</code>, <code>Bedrooms</code> and <code>Room Type</code> were removed because they have a strong relationship with <code>Accommodates</code>(<a href="#fig-matrix-mi" class="quarto-xref">Figure&nbsp;15</a>)</p></li>
+<li><p>The features <code>Longitude</code>, <code>Smart Location_madrid, spain</code> and <code>Neighbour_centro</code> have a strong relationship according to <a href="#fig-matrix-mi" class="quarto-xref">Figure&nbsp;15</a>. Aditionally, <code>Smart Location_madrid, spain</code> and <code>Country Code_ES</code> present moderate correlation (<a href="#fig-features-cramer" class="quarto-xref">Figure&nbsp;14</a>). Since <code>Longitude</code> and <code>Latitude</code> show high mutual information with the target, these two features were kept and the others removed.</p></li>
+<li><p>The one-hot enconded features derived <code>Property Type</code> were removed due to their strong relationship with the target-encoded version of <code>Property Type</code> (<a href="#fig-matrix-mi" class="quarto-xref">Figure&nbsp;15</a>). The target-encoded feature was kept because it shows a high relationship with target.</p></li>
+<li><p>The same approach was applied to the <code>Bed Type</code> features. Although both the encoded features show moderate relationships, the one-hot encoded version present a higher mutual information with target, so it was kept (<a href="#fig-mi-features" class="quarto-xref">Figure&nbsp;11</a>).</p></li>
+<li><p>The one-hot encoded <code>Cancellation Policy</code> features have very low predicitive power so were removed (<a href="#fig-mi-features" class="quarto-xref">Figure&nbsp;11</a> and <a href="#fig-1dmodel-features" class="quarto-xref">Figure&nbsp;12</a>).</p></li>
+</ul>
+<p>Finally, twenty features were kept to perform the step of searching for the optimal subset of features.</p>
+<div id="cell-fig-mi-features" class="cell" data-execution_count="54">
+<div class="cell-output cell-output-display">
+<div id="fig-mi-features" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mi-features-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-mi-features-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mi-features-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: Mutual information of features
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-fig-1dmodel-features" class="cell" data-execution_count="55">
+<div class="cell-output cell-output-display">
+<div id="fig-1dmodel-features" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-1dmodel-features-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-1dmodel-features-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-1dmodel-features-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: RMSE difference relative to worst 1D model
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-fig-features-corr" class="cell" data-execution_count="56">
+<div class="cell-output cell-output-display">
+<div id="fig-features-corr" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-features-corr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-features-corr-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-features-corr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13: Pearson correlation between features
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-fig-features-cramer" class="cell" data-execution_count="57">
+<div class="cell-output cell-output-display">
+<div id="fig-features-cramer" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-features-cramer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-features-cramer-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-features-cramer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14: Cramer’s V for categorical features
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-fig-matrix-mi" class="cell" data-execution_count="59">
+<div class="cell-output cell-output-display">
+<div id="fig-matrix-mi" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-matrix-mi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exerciseML_files/figure-html/fig-matrix-mi-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-matrix-mi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15: Mutual information matrix
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="optimal-subset-of-features." class="level4">
+<h4 class="anchored" data-anchor-id="optimal-subset-of-features.">Optimal subset of features.</h4>
+<p>From this set of twenty features, an optimal subset was searched using a genetic algorithm combined with a lineal regression model to evaluate the candidate subsets. After running the genetic algorithm, a subset of fifteen features was selected.</p>
 </section>
 </section>
-<section id="todo-copy-second-selection-of-features" class="level1">
-<h1>TODO copy second selection of features</h1>
-</section>
-<section id="todo-finish-with-a-number-of-features-to-consider" class="level1">
-<h1>TODO Finish with a number of features to consider</h1>
-</section>
-<section id="todo-feature-visalization-features-for-prediction" class="level1">
-<h1>TODO Feature visalization (Features for prediction)</h1>
 </section>
 
 </main>
