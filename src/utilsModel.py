@@ -206,7 +206,6 @@ class TrainModels:
         save_objects(self.list_of_models, self.filename)
 
     def summary(self, score):
-        score = 'f1_score'
         results ={
             'model_name': [],
             'date_train': [],
@@ -230,10 +229,11 @@ class TrainModels:
             if (score != 'loss') & (score != 'confusion_matrix'):
                 print(f'{score}: {round(value[0], 2)}')
 
-        print(f"Confusion matrix: {info['scores']['confusion_matrix'][0]}")
+        if 'confusion_matrix' in info['scores']:
+            print(f"Confusion matrix: {info['scores']['confusion_matrix'][0]}")
 
-        cm = np.array(info['scores']['confusion_matrix'][0] , dtype=int)
-        confusion_matrix_plot(cm)
+            cm = np.array(info['scores']['confusion_matrix'][0] , dtype=int)
+            confusion_matrix_plot(cm)
 
     def remove_model(self, model_name):
         self.list_of_models.pop(model_name)

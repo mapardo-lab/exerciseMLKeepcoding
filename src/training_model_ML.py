@@ -21,7 +21,7 @@ def main():
         sys.exit(1)
     study_name = sys.argv[1]
 
-    storage = 'sqlite:///optuna/optuna_DL_exercise.db'
+    storage = 'sqlite:///optuna/optuna_ML_exercise.db'
     study = optuna.load_study(
         study_name = study_name,
         storage = storage
@@ -50,13 +50,16 @@ def main():
     # split data into train and test datasets
     print('Splitting dataset in train and test...')
     test_size_test = config['split_test']
-    df_train, df_test = train_test_split(df_preproc, test_size = test_size_test, random_state = random_state, stratify=df_preproc['target'])
+    if 'stratify' in config:
+        df_train, df_test = train_test_split(df_preproc, test_size = test_size_test, random_state = random_state, stratify=df_preproc[config['stratify']]) 
+    else:
+        df_train, df_test = train_test_split(df_preproc, test_size = test_size_test, random_state = random_state) 
     print(f'Train: {df_train.shape[0]}/Test: {df_test.shape[0]}')
 
     # preprocess data Imputation/Encoding/Transformation
     print('Processing data...')
     proc = load_class_from_config(config['proc'])
-    proc.fit(df_train)
+    proc.fit(df_train, df_train['target'])
 
     # Loading parameters
     print('Loading parameters...')

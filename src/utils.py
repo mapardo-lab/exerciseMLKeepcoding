@@ -170,7 +170,18 @@ def calculate_scores(y_true, y_pred, scoring):
 def check_params(file_config, save_config):
     with open(file_config, 'rb') as f:
         saved_config = pickle.load(f)
-    if saved_config != save_config:
-        return False
-    else:
-        return True
+    result = []
+    for key, value in saved_config.items():
+        if isinstance(value, partial):
+            result.append(equal_partial(saved_config[key], save_config[key]))
+        else:
+            result.append(saved_config[key] == save_config[key])
+    return all(result)
+
+def equal_partial(p1, p2):
+    return (
+        p1.func == p2.func and
+        p1.args == p2.args and
+        p1.keywords == p2.keywords
+    )
+

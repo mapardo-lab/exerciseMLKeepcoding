@@ -22,6 +22,5 @@ def preprocess_amenities(amenities, selection):
 def preprocess_target01(df): 
     # Remove samples without info about Price
     df_out = df[~(df['Price'].isna())].copy()
-    #df['Likes_Dislikes'] = df['Likes'] - df['Dislikes']
-    #df['target'] = df['Likes_Dislikes'].apply(lambda x: 1 if x > 0 else 0)
+    df_out['target'] = df_out['Price']
     return df_out

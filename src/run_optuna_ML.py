@@ -40,19 +40,21 @@ def main():
     # split data into train and test datasets
     print('Splitting dataset in train and test...')
     test_size_test = config['test_size_test']
-    #df_train, df_test = train_test_split(df_processed, test_size = test_size_test, random_state = random_state, stratify=df_processed['target']) 
-    df_train, df_test = train_test_split(df_processed, test_size = test_size_test, random_state = random_state) 
+    if 'stratify' in config:
+        df_train, df_test = train_test_split(df_processed, test_size = test_size_test, random_state = random_state, stratify=df_processed[config['stratify']]) 
+    else:
+        df_train, df_test = train_test_split(df_processed, test_size = test_size_test, random_state = random_state) 
     print(f'Train: {df_train.shape[0]}/Test: {df_test.shape[0]}')
 
     # preprocess data Imputation/Encoding/Transformation
     print('Loading transformation data process...')
     proc = load_class_from_config(config['proc'])
-    proc.fit(df_train, df_train['Price'])
+    proc.fit(df_train, df_train['target'])
     
     # Modify to new framework
     print('Processing data...')
     X_train = proc.transform(df_train)
-    y_train = df_train['Price']
+    y_train = df_train['target']
 
     # hyperparameter to optimizate
     print('Loadind search space...')
@@ -83,17 +85,14 @@ def main():
     )
 
     # parameters for study
-    # TODO Write parameters in .yaml file
+    # TODO Write complete sampler info into .yaml file
+    config_study = config['study']
     study_params = {
-        'direction': 'maximize',
-        'storage': 'sqlite:///optuna/optuna_ML_exercise.db',  # Persistent storage
+        'direction': config_study['direction'],
+        'storage': config_study['storage'],
         'study_name': study_name,
-        'sampler': optuna.samplers.TPESampler(
-            n_startup_trials = 10,
-            n_ei_candidates = 24,
-            seed=42),
-        'pruner': None,
-        'load_if_exists': True  # Continue if study exists
+        'sampler': optuna.samplers.TPESampler(**config_study['sampler']),
+        'load_if_exists': True
     }
 
     # save parameters
@@ -109,6 +108,7 @@ def main():
         'model': model,
         'scoring': config['scoring']
     }
+
     # check if .pkl file exists. If it exists check if the configuration is the same
     if os.path.exists(file_config):
         print('Configuration file found. Checking for consistency...')

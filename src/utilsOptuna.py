@@ -240,6 +240,7 @@ class Study():
 
     def _build_list_runs(self):
         list_runs_name = set([trial.user_attrs.get('run', None) for trial in self.study.trials])
+        direction = self.study.direction.name
         list_runs = {}
         for run_name in list_runs_name:
             trials = []
@@ -247,7 +248,7 @@ class Study():
                 name = trial.user_attrs.get('run', None)
                 if name == run_name:
                     trials.append(trial)
-            list_runs[run_name] = Run(trials)
+            list_runs[run_name] = Run(trials, direction)
         return list_runs
 
     def show_runs(self):
@@ -317,7 +318,8 @@ class Study():
         fig, axes = plt.subplots(1, n_plots, figsize=(2*n_plots, 4), sharey=True)
         axes = axes.flatten()
 
-        best_score =max(values['score'])
+#        best_score =max(values['score'])
+        best_score = self.study.best_value
         
         i = 0
         for param, log in params.items():
@@ -386,8 +388,9 @@ class Study():
         return df
 
 class Run():
-    def __init__(self, list_trials):
+    def __init__(self, list_trials, direction):
         self.trials = list_trials
+        self.direction = direction
         self.state = self._build_total_state()
         self.start = self._build_start()
         self.end = self._build_end()
@@ -425,7 +428,9 @@ class Run():
             scores = scores + trial.values
         if len(scores) == 0:
             return 0
-        else:
+        elif self.direction == 'MINIMIZE':
+            return min(scores)
+        elif self.direction == 'MAXIMIZE':
             return max(scores)
     
     def get_state(self):
