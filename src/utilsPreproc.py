@@ -1,6 +1,9 @@
 import pandas as pd
 
 def preprocess_features01(df): 
+    """
+    Preprocess Amenities feature and select the most relevant ones
+    """
     df_out = df.copy()
     # amenities feature
     amenities_sel = ['air conditioning', 'family/kid friendly', 'tv', 'carbon monoxide detector', 
@@ -10,6 +13,9 @@ def preprocess_features01(df):
     return df_out
 
 def preprocess_amenities(amenities, selection):
+    """
+    Select amenities from Amenities feature
+    """
     result = []
     if isinstance(amenities, list):
         for amenity in amenities:
@@ -20,7 +26,9 @@ def preprocess_amenities(amenities, selection):
         return result
 
 def preprocess_target01(df): 
-    # Remove samples without info about Price
+    """
+    Remove samples with missing Price data and set Price as target
+    """
     df_out = df[~(df['Price'].isna())].copy()
     df_out['target'] = df_out['Price']
     return df_out

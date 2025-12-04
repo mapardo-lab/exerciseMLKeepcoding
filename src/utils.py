@@ -1,6 +1,5 @@
 import numpy  as np  
 import random
-import base64
 import pickle
 import os
 import yaml
@@ -22,53 +21,6 @@ def build_scorer(metric_func, **metric_params):
     def scorer(y_true, y_pred):
         return metric_func(y_true, y_pred, **metric_params)
     return scorer
-
-def get_column_transformer_info(column_transformer): 
-    """
-    Get comprehensive info for a ColumnTransformer
-    """
-    
-    def get_transformer_info(transformer):
-        return {
-            'class': transformer.__class__.__name__,
-            'module': transformer.__module__,
-        }
-    
-    ct_info = {
-        'type': 'ColumnTransformer',
-        'transformers': [],
-    }
-    
-    for name, transformer, columns in column_transformer.transformers:
-        ct_info['transformers'].append({
-            'name': name,
-            'columns': columns,
-            'transformer': get_transformer_info(transformer)
-        })
-    
-    return ct_info
-
-def info_object(obj):
-    results = {}
-    results['name'] = obj.__name__
-    results['module'] = obj.__module__
-    return results
-
-def info_train(train_config):
-    result = {}
-    for key, value in train_config.items():
-        if (isinstance(value, type) | callable(value)):
-            result[key] = info_object(value)
-    return result
-
-def serial_encode(obj):
-    serialized = dill.dumps(obj)
-    encoded = base64.b64encode(serialized).decode("utf-8")
-    return encoded
-
-def serial_decode(encoded):
-    decoded = dill.loads(base64.b64decode(encoded))
-    return decoded
 
 def confusion_matrix_list(y_true, y_pred):
     return confusion_matrix(y_true, y_pred).tolist()
@@ -111,12 +63,35 @@ def load_yaml_config(file_path: str):
         return {}
 
 def load_from_config(config):
+    """
+    Loads a class instance or a function (potentially partially applied)
+    based on the provided configuration dictionary.
+
+    Args:
+        config (dict): A dictionary containing 'class' or 'function' keys
+                       along with 'module' and optional 'parameters'.
+
+    Returns:
+        object or callable: An instance of the specified class or the loaded function.
+    """
     if 'class' in config:
         return load_class_from_config(config)
     elif 'function' in config:
         return load_function_from_config(config)
     
 def load_function_from_config(config):
+    """
+    Loads a function from a module based on a configuration dictionary.
+
+    If 'parameters' are provided in the config, it returns a partial function
+    with those parameters pre-applied.
+
+    Args:
+        config (dict): Configuration dictionary with 'module', 'function', and optional 'parameters'.
+
+    Returns:
+        callable: The loaded function or a partial function.
+    """
     module_name = config['module']
     function_name = config['function']
     module = importlib.import_module(module_name)
@@ -127,6 +102,20 @@ def load_function_from_config(config):
         return function
 
 def load_class_from_config(config):
+    """
+    Loads and instantiates a class or calls a class method from a module
+    based on a configuration dictionary.
+
+    - If 'parameters' are present, it instantiates the class with them.
+    - If 'function' is present, it calls that class method with 'parameters'.
+    - Otherwise, it returns the class definition itself.
+
+    Args:
+        config (dict): Configuration dictionary with 'module', 'class', and optional 'parameters' or 'function'.
+
+    Returns:
+        object or callable: An instance of the class, the result of a class method, or the class itself.
+    """
     module_name = config['module']
     class_name = config['class']
     module = importlib.import_module(module_name)
@@ -141,6 +130,18 @@ def load_class_from_config(config):
         return class_load
 
 def load_dict_from_config(config):
+    """
+    Recursively loads objects from a configuration dictionary.
+
+    It iterates through the dictionary and, for any value that is a dictionary
+    containing a 'module' key, it loads the corresponding object.
+
+    Args:
+        config (dict): A dictionary possibly containing sub-dictionaries for object loading.
+
+    Returns:
+        dict: A new dictionary with the specified objects loaded.
+    """
     result = {}
     for key, value in config.items():
         if isinstance(value, dict) and 'module' in value:
@@ -150,6 +151,16 @@ def load_dict_from_config(config):
     return result
 
 def load_make_scorer_from_config(config):
+    """
+    Creates a dictionary of scikit-learn scorer objects from a configuration.
+
+    Args:
+        config (dict): A dictionary where keys are scorer names and values are
+                       configurations for the metric functions.
+
+    Returns:
+        dict: A dictionary of scikit-learn scorer objects.
+    """
     result = {}
     for name_score, score in config.items():
         module_name = score['module']
@@ -161,6 +172,18 @@ def load_make_scorer_from_config(config):
     return result
 
 def calculate_scores(y_true, y_pred, scoring):
+    """
+    Calculates scores based on true and predicted values using a scoring configuration.
+
+    Args:
+        y_true (array-like): Ground truth (correct) target values.
+        y_pred (array-like): Estimated targets as returned by a classifier.
+        scoring (dict): A dictionary where keys are score names and values are
+                        configurations for the scoring functions.
+
+    Returns:
+        dict: A dictionary with score names as keys and their calculated values.
+    """
     results = {}
     for score, function in scoring.items():
          function_score = load_function_from_config(function)
@@ -168,6 +191,16 @@ def calculate_scores(y_true, y_pred, scoring):
     return results
 
 def check_params(file_config, save_config):
+    """
+    Compares a saved configuration from a pickle file with a given configuration object.
+
+    Args:
+        file_config (str): Path to the pickled configuration file.
+        save_config (dict): The configuration object to compare against.
+
+    Returns:
+        bool: True if the configurations are identical, False otherwise.
+    """
     with open(file_config, 'rb') as f:
         saved_config = pickle.load(f)
     result = []
@@ -179,9 +212,18 @@ def check_params(file_config, save_config):
     return all(result)
 
 def equal_partial(p1, p2):
+    """
+    Checks if two functools.partial objects are equivalent.
+
+    Args:
+        p1 (functools.partial): The first partial object.
+        p2 (functools.partial): The second partial object.
+
+    Returns:
+        bool: True if the functions, arguments, and keywords are the same, False otherwise.
+    """
     return (
         p1.func == p2.func and
         p1.args == p2.args and
         p1.keywords == p2.keywords
     )
-

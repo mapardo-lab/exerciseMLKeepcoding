@@ -57,10 +57,6 @@ class TransformMetadata:
     def get_transformation(name):
         """Get different transformation configurations"""
         
-#['Accommodates', 'Bathrooms', 'Property Type TE', 'Cancellation Policy TE', 
-# 'air conditioning', 'family/kid friendly', 'tv', 'carbon monoxide detector', 
-# 'dryer', 'lock on bedroom door', 'cable tv', 'iron', 'elevator in building', 'internet', 'kitchen']
-
         # Target Encoding
         categorical_features = ['Property Type', 'Cancellation Policy']
         categorical_pipeline = Pipeline(steps=[
