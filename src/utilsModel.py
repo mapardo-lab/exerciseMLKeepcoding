@@ -69,7 +69,7 @@ class TrainModels:
             results[score].append(info['scores'][score][0])
         return pd.DataFrame(results)
 
-    def info_model(self, model_name):
+    def info_model_results(self, model_name):
         """
         Displays detailed information for a specific trained model.
 
@@ -93,6 +93,30 @@ class TrainModels:
 
             cm = np.array(info['scores']['confusion_matrix'][0] , dtype=int)
             confusion_matrix_plot(cm)
+
+
+    def info_model_summary(self, model_name):
+        """
+        Displays detailed information for a specific trained model.
+
+        This includes metadata like the training date and performance scores.
+        If a confusion matrix is available, it is printed and plotted.
+
+        Args:
+            model_name (str): The name of the model to inspect.
+        """
+        info = self.list_of_models[model_name]
+
+        print(f'Model name: {model_name}')
+        print(f"Study: {info['study']}")
+        print(f"Trial: {info['number_trial']}")
+        print(f"Date training: {info['date'].strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"Data file: {info['data_file']}")
+        print(f"Feature preprocessing: {info['preproc_features'].__name__}")
+        print(f"Feature processing: {info['proc']}") # TODO Output simpler module/[class]/function/parameters --> Function in training_model_ML.py for config['proc']
+        print(f"Model: {info['model']}") 
+        print(f"Hyperparameters: {info['model_params']}")
+        print(f"Model file: {info['file_model']}") 
 
     def remove_model(self, model_name):
         """

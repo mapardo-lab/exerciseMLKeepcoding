@@ -101,6 +101,7 @@ def main():
         'data_file': data_file,
         'preproc_features': preproc_features,
         'proc': proc,
+        'model': model,
         'file_model': file_model,
         'model_params': model_params,
         'date': datetime.now(),
