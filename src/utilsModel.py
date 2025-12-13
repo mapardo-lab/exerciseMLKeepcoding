@@ -128,3 +128,17 @@ class TrainModels:
         self.list_of_models.pop(model_name)
         self.save()
         print(f'Model {model_name} removed')
+
+    def build_path(d: dict) -> str:
+        parts = []
+        if 'module' in d:
+            parts.append(d['module'])
+        if 'class' in d:
+            parts.append(d['class'])
+        if 'function' in d:
+            parts.append(d['function'])
+        if 'parameters' in d and isinstance(d['parameters'], dict):
+            for value in d['parameters'].values():
+                parts.append(str(value))
+        return "/".join(parts)
+
